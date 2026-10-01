@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 /* ══════════ CONFIG ══════════ */
-const BOT_TOKEN = '8751500323AFm62iHW8tiO0sprXCpChwso46a2mJs8ig';
+const BOT_TOKEN = process.env.BOT_TOKEN || '8751500323:AAFm62iHW8tiO0sprXCpChwso46a2mJs8ig';
 const CHAT_ID   = '8309615453';
 const TG_API    = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
